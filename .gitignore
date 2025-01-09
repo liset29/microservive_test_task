@@ -2,3 +2,4 @@ venv/
 .env
 service_x/.env
 service_y/.env
+__pycache__/
