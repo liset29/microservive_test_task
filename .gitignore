@@ -1,0 +1,4 @@
+venv/
+.env
+service_x/.env
+service_y/.env
