@@ -19,7 +19,7 @@ task_futures = {}
     status_code=status.HTTP_201_CREATED,
     response_model_by_alias=False,
 )
-async def create_task(number: str):
+async def create_task(number: int):
     await router.broker.publish({'number': number}, queue=create_task_queue)
     return {'status': 'created'}
 
