@@ -1,8 +1,9 @@
 import logging
 
-from service_y.app.calc_fibonacci import fibonacci
 from service_y.app.db.database import db_session
+from service_y.app.calc_fibonacci import fibonacci
 from service_y.app.db.models import Task
+from service_y.app.shemas import TaskSchema, AllTasksResponse
 
 
 class TaskHandler:
@@ -43,3 +44,35 @@ class TaskHandler:
         except Exception as e:
             logging.error(f"Ошибка при запуске задачи: {e}")
             raise
+
+    @staticmethod
+    async def get_all_tasks() -> AllTasksResponse:
+        try:
+            logging.info("Получение всех задач.")
+            tasks = db_session.query(Task).all()
+            tasks_info = [TaskSchema.model_validate(task) for task in tasks]
+            logging.info(f"Найдено {len(tasks_info)} задач.")
+            tasks_info = AllTasksResponse(tasks=tasks_info)
+            return tasks_info
+        except Exception as e:
+            logging.error(f"Ошибка при получении всех задач: {e}")
+            raise
+
+    @staticmethod
+    async def get_task(id) -> TaskSchema:
+        try:
+            logging.info(f"Запрос на получение задачи с id: {id}")
+
+            task = db_session.query(Task).filter(Task.id == id).first()
+
+            if not task:
+                logging.warning(f"Задача с id {id} не найдена.")
+                return None
+
+            task_data = TaskSchema.model_validate(task)
+
+            logging.info(f"Задача с id {id} получена: {task_data}")
+            return task_data
+        except Exception as e:
+            logging.error(f"Ошибка при получении задачи с id {id}: {e}")
+            raise e
