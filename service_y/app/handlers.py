@@ -1,29 +1,29 @@
+import asyncio
 import logging
 
-from service_y.app.db.database import db_session
 from service_y.app.calc_fibonacci import fibonacci
+from service_y.app.db.database import db_session
 from service_y.app.db.models import Task
 from service_y.app.shemas import TaskSchema, AllTasksResponse
 
 
 class TaskHandler:
     @staticmethod
-    async def create_task(data: dict):
+    async def create_task(number: int) -> TaskSchema:
         try:
-            logging.info(f"Создание задачи с данными: {data}")
-            task = Task(status="created", number=data['number'])
+            logging.info(f"Создание задачи с данными: {number}")
+            task = Task(status="created", number=number)
             db_session.add(task)
             db_session.commit()
-            logging.info(f"Задача создана: {task.id} со статусом {task.status}")
-            return {"id": task.id, "status": task.status}
+            task = TaskSchema.model_validate(task)
+            return task
         except Exception as e:
             logging.error(f"Ошибка при создании задачи: {e}")
             raise
 
     @staticmethod
-    async def start_task(data: dict):
+    async def start_task(task_id) -> TaskSchema:
         try:
-            task_id = data["id"]
             logging.info(f"Запуск задачи с ID: {task_id}")
 
             task = db_session.query(Task).filter(Task.id == task_id).first()
@@ -32,12 +32,9 @@ class TaskHandler:
                 db_session.commit()
                 logging.info(f"Статус задачи {task_id} обновлен на 'in_progress'")
 
-                result = fibonacci(task.number)
-                task.result = result
-                task.status = 'completed'
-                db_session.commit()
-                logging.info(f"Задача {task_id} завершена со статусом 'completed' и результатом {result}")
-                return {"id": task_id, "status": task.status, "result": result}
+                asyncio.create_task(TaskHandler.compute_task(task_id, task.number))
+                task = TaskSchema.model_validate(task)
+                return task
 
             logging.warning(f"Задача с ID {task_id} не найдена.")
             return {"error": "Task not found"}
@@ -46,33 +43,27 @@ class TaskHandler:
             raise
 
     @staticmethod
-    async def get_all_tasks() -> AllTasksResponse:
+    async def compute_task(task_id: int, number: int):
         try:
-            logging.info("Получение всех задач.")
-            tasks = db_session.query(Task).all()
-            tasks_info = [TaskSchema.model_validate(task) for task in tasks]
-            logging.info(f"Найдено {len(tasks_info)} задач.")
-            tasks_info = AllTasksResponse(tasks=tasks_info)
-            return tasks_info
+            result = await asyncio.to_thread(fibonacci, number)
+            task = db_session.query(Task).filter(Task.id == task_id).first()
+            if task:
+                task.result = result
+                task.status = 'completed'
+                db_session.commit()
+                logging.info(f"Задача {task_id} завершена со статусом 'completed' и результатом {result}")
         except Exception as e:
-            logging.error(f"Ошибка при получении всех задач: {e}")
-            raise
+            logging.error(f"Ошибка при вычислении задачи {task_id}: {e}")
 
     @staticmethod
-    async def get_task(id) -> TaskSchema:
-        try:
-            logging.info(f"Запрос на получение задачи с id: {id}")
+    async def get_all_tasks() -> AllTasksResponse:
+        tasks = db_session.query(Task).all()
+        tasks_info = [TaskSchema.model_validate(task) for task in tasks]
+        return AllTasksResponse(tasks=tasks_info)
 
-            task = db_session.query(Task).filter(Task.id == id).first()
-
-            if not task:
-                logging.warning(f"Задача с id {id} не найдена.")
-                return None
-
-            task_data = TaskSchema.model_validate(task)
-
-            logging.info(f"Задача с id {id} получена: {task_data}")
-            return task_data
-        except Exception as e:
-            logging.error(f"Ошибка при получении задачи с id {id}: {e}")
-            raise e
+    @staticmethod
+    async def get_task(task_id: int) -> TaskSchema:
+        task = db_session.query(Task).filter(Task.id == task_id).first()
+        if not task:
+            return None
+        return TaskSchema.model_validate(task)
