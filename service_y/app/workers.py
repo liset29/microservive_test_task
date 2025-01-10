@@ -7,7 +7,7 @@ broker = RabbitBroker()
 
 @broker.subscriber(create_task_queue)
 async def create_task(message: dict):
-    response_data = await TaskHandler.create_task(message['number'])
+    response_data = await TaskHandler.create_task(message.get('number'))
     await broker.publish(
         {"data": response_data, "correlation_id": message.get("correlation_id")},
         queue=response_queue,
@@ -16,7 +16,7 @@ async def create_task(message: dict):
 
 @broker.subscriber(start_task_queue)
 async def start_task(message: dict):
-    response_data = await TaskHandler.start_task(message['id'])
+    response_data = await TaskHandler.start_task(message.get('id'))
     await broker.publish(
         {"data": response_data, "correlation_id": message.get("correlation_id")},
         queue=response_queue,

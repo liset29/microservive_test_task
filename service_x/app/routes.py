@@ -1,7 +1,7 @@
 import uuid
 from faststream.rabbit.fastapi import RabbitRouter
 from starlette import status
-from service_x.app.shemas import TaskSchema, AllTasksResponse
+from service_x.app.schemas import TaskSchema, AllTasksResponse
 from service_x.app.state import task_futures
 from service_x.app.utils import publish_and_wait
 from service_x.config import (

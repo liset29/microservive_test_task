@@ -4,7 +4,7 @@ import logging
 from service_y.app.calc_fibonacci import fibonacci
 from service_y.app.db.database import db_session
 from service_y.app.db.models import Task
-from service_y.app.shemas import TaskSchema, AllTasksResponse
+from service_y.app.schemas import TaskSchema, AllTasksResponse
 
 
 class TaskHandler:
