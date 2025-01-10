@@ -18,3 +18,17 @@
 2. **Запуск задачи по её `id`
 3. **Получение результатов и статуса всех задач**.
 4. Реализация через **FastAPI**.
+
+
+## Установка 
+
+1. Клонируйте репозиторий:
+   git clone <URL-репозитория>
+2. Скачайте зависимости:
+    pip install -r requirements.txt
+3. Запустите Postgresql и Rabbitmq:
+    docker-compose up
+4. Запустить микросервис y:
+     faststream run service_y.main:app
+5. Запустите микросервис x:
+    uvicorn service_x.main:app --host 0.0.0.0 --port 80
