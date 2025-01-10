@@ -1,0 +1,6 @@
+RABBITMQ_URL = "amqp://guest:guest@localhost/"
+DATABASE_URL = "postgresql://root:root@localhost:5433/tasks_db"
+CREATE_TASK_QUEUE=create_task
+START_TASK_QUEUE=start_task
+REQUEST_TASK_QUEUE=process_request
+RESPONSE_TASK_QUEUE=process_response

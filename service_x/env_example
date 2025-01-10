@@ -1,0 +1,5 @@
+RABBITMQ_URL = "amqp://guest:guest@localhost/"
+CREATE_TASK_QUEUE=create_task
+START_TASK_QUEUE=start_task
+REQUEST_TASK_QUEUE=process_request
+RESPONSE_TASK_QUEUE=process_response
