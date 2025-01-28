@@ -24,6 +24,7 @@ router = RabbitRouter(RABBITMQ_URL, prefix="/tasks", tags=["Tasks"])
 )
 async def create_task(number: int):
     correlation_id = str(uuid.uuid4())
+    print(123)
     payload = {"number": number, "correlation_id": correlation_id}
     return await publish_and_wait(router, payload, create_task_queue)
 
