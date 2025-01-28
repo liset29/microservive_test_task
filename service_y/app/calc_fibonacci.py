@@ -8,4 +8,5 @@ def fibonacci(n):
     else:
         result = fibonacci(n - 1) + fibonacci(n - 2)
         logging.info(f"fibonacci({n}) = {result}")
+        print('432342')
         return result
